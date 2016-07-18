@@ -21,7 +21,6 @@ class RModulesOutputRenderService {
 	static scope         = "request"
 
 	def grailsApplication
-	def zipService
     def asyncJobService
     def currentUserBean
 	def tempDirectory = ""
@@ -101,11 +100,6 @@ class RModulesOutputRenderService {
         try {
             boolean isAllowedToExport = asyncJobService.isUserAllowedToExportResults(currentUserBean, jobName)
             if (isAllowedToExport) {
-                // Zip the working directory
-                String zipLocation = "${analysisDirectory}zippedData.zip"
-                if (!new File(zipLocation).isFile()) {
-                    zipService.zipFolder(tempDirectory, zipLocation)
-                }
                 this.zipLink = "${imageURL}${jobName}/zippedData.zip"
             }
         } catch (Exception e) {
