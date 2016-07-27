@@ -9,11 +9,16 @@ class AnalysisFilesController {
 
     public static final String ROLE_ADMIN = 'ROLE_ADMIN'
 
+    public static final String RESULTS_ZIP_FILENAME = 'zippedData.zip'
+    public static final String RESULTS_WORKING_DIRECTORY = 'workingDirectory'
+
     def sendFileService
 
     def springSecurityService
 
     def RModulesOutputRenderService
+
+    def zipService
 
     def download() {
         String jobName = params.analysisName
@@ -56,9 +61,15 @@ class AnalysisFilesController {
         }
 
         if (!targetFile.isFile()) {
-            log.warn "Request for $targetFile, but such file does not exist"
-            render status: 404
-            return
+            if (params.path == RESULTS_ZIP_FILENAME) {
+                def zipFolderAbsolutePath = [targetFile.parent, RESULTS_WORKING_DIRECTORY].join(File.separator)
+                log.debug "Generating zip file for ${zipFolderAbsolutePath}."
+                zipService.zipFolder(zipFolderAbsolutePath, targetFile.absolutePath)
+            } else {
+                log.warn "Request for $targetFile, but such file does not exist"
+                render status: 404
+                return
+            }
         }
 
         sendFileService.sendFile servletContext, request, response, targetFile
